@@ -1,0 +1,1056 @@
+{
+  "name": "latest",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "94e51b2c-a0c1-43ad-916d-a285e04be106",
+      "name": "Run Setup",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        12256,
+        16384
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "workflow_state",
+        "columns": {
+          "column": [
+            {
+              "name": "key"
+            },
+            {
+              "name": "value"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "93a45f7e-bb94-48dc-b0ca-a3cb7b38e47d",
+      "name": "Create State Table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        12528,
+        16384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "workflow_state"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "last_id"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "last_id",
+            "value": "0"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5e1b1370-c405-4621-85ef-6820019f1aae",
+      "name": "Initialize last_id",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        12816,
+        16384
+      ],
+      "notes": "Creates or resets the persistent state row."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc089525-f69a-4924-af26-8d42a9f1c6e2",
+              "name": "setup_status",
+              "value": "complete",
+              "type": "string"
+            },
+            {
+              "id": "cc924e08-2acc-452d-9868-b2708a2d3d68",
+              "name": "state_table",
+              "value": "workflow_state",
+              "type": "string"
+            },
+            {
+              "id": "0def22c9-1c72-4544-9366-597ee5a34f42",
+              "name": "last_id",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "6b5f89ea-5eeb-4b76-9394-bf7c438a0a75",
+              "name": "message",
+              "value": "Setup completed. workflow_state is ready and last_id is initialized to 0.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f24c5ce-cd23-4481-aeb7-a8a366a0bac7",
+      "name": "Setup Complete",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        13104,
+        16384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# SETUP WORKFLOW — INSTALLATION GUIDE\n\n## Purpose\nRun this workflow once after importing the product. It prepares the persistent workflow state and verifies the external services used by the main workflow.\n\n## First-run procedure\n1. Open the credential fields on the two test nodes (in the green section to the right).\n2. Select your **Bright Data** and **OpenAI** credentials.\n3. Execute the `Run Setup` node.\n4. Inspect the `Setup Test Summary` node at the end. \n5. If everything passes, activate the main workflow!\n\n## Persistent State (`last_id`)\nThe main workflow runs every minute and uses `last_id` as the cursor to fetch only *new* posts. This setup creates the `workflow_state` Data Table and initializes that cursor to `0`.\n\n **WARNING**: Re-running this setup workflow will reset `last_id` to `0`. If the main workflow has already processed production data, do NOT rerun setup unless you intentionally want to reset the cursor.\n\n## 🩺 Troubleshooting\n**Bright Data test fails:**\n- Ensure your API token is valid and the `fetch_truths` zone exists.\n- If `Missing zone parameter`, verify the request is POST with `zone` in the JSON body.\n\n**ChatGPT test fails:**\n- Check the OpenAI API key.\n- Ensure `gpt-4o-mini` is accessible to the account.\n\n## Security\nNever store API keys in Data Tables, Set nodes, or sticky notes. Use n8n credentials for all secrets!",
+        "height": 1004,
+        "width": 550,
+        "color": 7
+      },
+      "id": "7309e770-5fdf-4834-a348-b9914e9eb4ff",
+      "name": "README - Setup Workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        11584,
+        15792
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. API Connection Tests\nVerifies authentication for Bright Data and OpenAI before running the main workflow. These nodes do not affect production data.",
+        "height": 320,
+        "width": 600,
+        "color": 3
+      },
+      "id": "a9d2144e-911f-4b92-901c-0d0a594aa556",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12752,
+        15792
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.brightdata.com/request",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "b8fccd1a-1746-4dc2-b6ec-91cf1a9e55de",
+      "name": "Test Bright Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12816,
+        15904
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "fxhvEOIMWtsNDQuw",
+          "name": "Bright data"
+        }
+      },
+      "notes": "Connectivity/authentication test for Bright Data.\n\nThis intentionally uses the SAME Bright Data request endpoint and zone used by the production workflow:\n- Endpoint: https://api.brightdata.com/request\n- Zone: fetch_truths\n- Target: Truth Social account statuses\n- Limit: 1\n\nIf this node returns a successful Bright Data response, the configured Bearer credential and zone are usable.\n\nIf you get \"Missing zone parameter\", verify that this node uses POST and that the JSON body contains `zone: fetch_truths`.\nIf you get a zone/authorization error, verify the Bright Data credential and that the `fetch_truths` zone exists for the customer's account.\n\nThis test does not store or expose the API key."
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/responses",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "e2488389-6e00-44a8-b6f4-088702191832",
+      "name": "Test ChatGPT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13072,
+        15904
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "dfMSJ6B2oAMf0aQJ",
+          "name": "OpenAi account"
+        }
+      },
+      "notes": "Connectivity/authentication test for OpenAI.\n\nThis sends a deliberately tiny request to the OpenAI Responses API using the selected n8n OpenAI credential.\n\nExpected successful response:\n- HTTP 200\n- A response object containing the model output.\n\nIf you see \"Invalid request to GET /v1/responses\", the HTTP Request node is not using POST. This node is explicitly configured with requestMethod=POST and sendBody=true.\n\nIf you see an authentication error, select/create the customer's OpenAI API credential in this node.\nThe API key is stored in n8n credentials and is never written to the Data Table."
+    },
+    {
+      "parameters": {
+        "jsCode": "const bright = $('Test Bright Data').first().json;\nconst openai = $('Test ChatGPT').first().json;\n\nconst brightError = bright?.error?.message || bright?.message || bright?.data?.error || null;\nconst openaiError = openai?.error?.message || openai?.message || null;\n\nreturn [{\n  json: {\n    setup_status: (!brightError && !openaiError) ? 'complete' : 'failed',\n    state_table: 'workflow_state',\n    last_id: 0,\n    bright_data_test: brightError ? `FAILED: ${brightError}` : 'PASSED',\n    openai_test: openaiError ? `FAILED: ${openaiError}` : 'PASSED',\n    message: (!brightError && !openaiError)\n      ? 'Setup checks completed successfully. workflow_state is initialized and both API tests passed.'\n      : 'Setup completed with one or more failed checks. Inspect Test Bright Data and Test ChatGPT for details.'\n  }\n}];"
+      },
+      "id": "03f527eb-185e-44d1-b5ba-1648961ae5f8",
+      "name": "Setup Test Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13680,
+        16384
+      ],
+      "notes": "Produces a concise final setup summary after the state table and API tests have run."
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "76f63463-3070-4f4a-9fdd-3680ee0c01ce",
+      "name": "Wait For All Tests",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        13360,
+        16224
+      ],
+      "notes": "Synchronization barrier: waits until Setup Complete, Test Bright Data, and Test ChatGPT have all finished before releasing to Setup Test Summary. Fixes premature execution / 'hasn't been executed' errors caused by 3 branches previously fanning into the same input on Setup Test Summary."
+    },
+    {
+      "parameters": {
+        "content": "## 1. Trigger & State Management\nFetches new Truth Social statuses every minute. Uses n8n Data Tables to persist the `last_id` across executions to avoid processing duplicate posts.",
+        "height": 652,
+        "width": 1100
+      },
+      "id": "dd2041e3-14e2-4889-81b1-fa2a79e2e295",
+      "name": "Sticky Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        11552,
+        17824
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Data Formatting & Pre-Filtering\nExtracts and normalizes the required fields. A fast regex filter drops irrelevant posts before the LLM step to save API costs.",
+        "height": 520,
+        "width": 850,
+        "color": 4
+      },
+      "id": "0a9f094c-06d5-4289-9067-31384fa337a4",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12688,
+        17824
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. AI Classification\nGPT-4o-mini extracts intelligence from the post. Determines relevance, assigns severity, and provides a concise reasoning for the classification.",
+        "height": 786,
+        "width": 350,
+        "color": 6
+      },
+      "id": "19f5de04-2f97-4847-b0a7-64b3383ea0b9",
+      "name": "Sticky Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13568,
+        17824
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Alerting & Routing\nFormats the extracted output. If deemed materially relevant to geopolitical tension by the LLM, an alert payload is dispatched via Discord Webhook.",
+        "height": 346,
+        "width": 650,
+        "color": 5
+      },
+      "id": "db2017dc-cd69-4198-a70e-367ffd69b9d8",
+      "name": "Sticky Note 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        13968,
+        17824
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "6dc2e284-1ae5-4f03-94b3-b87ba807f619",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        13680,
+        18272
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "dfMSJ6B2oAMf0aQJ",
+          "name": "OpenAi account"
+        }
+      },
+      "notes": "Model is a live dropdown in the node UI — pick whatever the current cost-efficient GPT tier is when you configure this, the stored value is just a placeholder."
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "relevant",
+              "type": "boolean",
+              "description": "true if this post is materially about Iran-Israel-US military tension, strikes, troop movements, sanctions, nuclear negotiations, hostage situations, or proxy conflicts (Hezbollah, Houthis, Gaza, Lebanon, Syria); false if it only mentions these in passing or is about something else entirely.",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "description": "How urgent/significant this is for a geopolitical risk monitor: 'low', 'medium', or 'high'.",
+              "required": true
+            },
+            {
+              "name": "reason",
+              "description": "One short sentence explaining the classification.",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a geopolitical risk classifier monitoring social media posts from a prominent US political figure. Flag posts materially relevant to Iran-Israel-US tensions: strikes, troop movements, sanctions, nuclear negotiations, hostage situations, or proxy conflicts (Hezbollah, Houthis, Gaza, Lebanon, Syria). Ignore posts that only mention these topics in passing or are about unrelated politics/economy."
+        }
+      },
+      "id": "e687a3fa-da98-42f6-b5de-91e8ab3c633f",
+      "name": "Extract Classification (GPT)",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        13632,
+        18064
+      ],
+      "notes": "Attribute names/types may need a quick re-check in the node UI depending on your n8n version."
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "51390c66-8b10-478e-ab6f-c7779bac0edd",
+      "name": "Every minute",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        11600,
+        18080
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "workflow_state"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "last_id"
+            }
+          ]
+        }
+      },
+      "id": "f702485c-5b44-4acd-aeb1-52e3e162a84e",
+      "name": "Get last_id",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        11824,
+        18080
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "notes": "Reads persistent last_id from the workflow_state Data Table."
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "requestMethod": "POST",
+        "url": "=https://api.brightdata.com/request",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"zone\": \"fetch_truths\",\n  \"url\": \"https://truthsocial.com/api/v1/accounts/107780257626128497/statuses?limit=20&exclude_replies=true{{ $json.last_id ? '&since_id=' + $json.last_id : '' }}\",\n  \"format\": \"raw\"\n}"
+      },
+      "id": "41761f15-f8f5-4064-8d7f-94e1f5da8af1",
+      "name": "Fetch new statuses - BrightData",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        12048,
+        18080
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "fxhvEOIMWtsNDQuw",
+          "name": "Bright data"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        12496,
+        18352
+      ],
+      "id": "3f68f9c8-29f7-481a-bcae-708e82c72c5d",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "let maxId = \"0\";\n\nfor (const item of $input.all()) {\n  // Handle the case where BrightData returns the array of statuses directly\n  const posts = Array.isArray(item.json) ? item.json : [item.json];\n  \n  for (const post of posts) {\n    if (post && post.id) {\n      if (BigInt(post.id) > BigInt(maxId)) {\n        maxId = post.id.toString();\n      }\n    }\n  }\n}\n\nreturn [{ json: { highest_id: maxId } }];"
+      },
+      "id": "b139eac4-1cba-4b0e-81d1-01437c841c66",
+      "name": "Calculate Max ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12496,
+        17968
+      ],
+      "notes": "Finds the highest post ID in the batch safely before storing it."
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "workflow_state"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "last_id"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "last_id",
+            "value": "={{ $json.highest_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0d94a298-8521-45d1-997b-0a0efafa124c",
+      "name": "Update last_id",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        12720,
+        17968
+      ],
+      "executeOnce": true,
+      "notes": "Persists the newest Truth Social status ID to workflow_state."
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  return {\n    json: {\n      id: item.json.id,\n      content: item.json.content,\n      created_at: item.json.created_at, // exact timestamp\n      raw: item.json\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12496,
+        18160
+      ],
+      "id": "ba6181cc-4867-470b-a712-7633b3d28d48",
+      "name": "extract created_at"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "raw",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        12944,
+        18160
+      ],
+      "id": "3e103a98-3799-4c4d-981f-ba5c9c171d2a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ /\\b(iran|iranian|israel|israeli|idf|tehran|hormuz|nuclear|missile|airstrike|air strike|strike on|bomb|bombing|war\\b|invasion|attack|ceasefire|cease-fire|hezbollah|houthi|houthis|gaza|lebanon|syria|nuclear facility|enrichment|revolutionary guard|irgc)\\b/i.test($json.content || '') }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "b03dd76e-b22f-4187-b9e1-b3ccae958ba4",
+      "name": "Keyword Prefilter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        13392,
+        18160
+      ],
+      "notes": "Cheap first pass so the LLM (and its cost) is only spent on posts that mention war/conflict-adjacent keywords. Tune the regex list as needed — it will miss anything phrased without these words, which the alternative (always-run-LLM) approach in the writeup avoids."
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        13680,
+        18416
+      ],
+      "id": "f72de9d9-6b4a-443f-b380-7f1eeeba9748",
+      "name": "No Operation, do nothing, irrelevant"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70936b47-077f-4b02-a61e-d37698b0ab0f",
+              "name": "relevant",
+              "value": "={{ $json.output.relevant }}",
+              "type": "boolean"
+            },
+            {
+              "id": "8333df10-444a-449e-9451-214d047e4bdc",
+              "name": "severity",
+              "value": "={{ $json.output.severity }}",
+              "type": "string"
+            },
+            {
+              "id": "29ec2e25-b24b-4571-843c-f511f4206248",
+              "name": "reason",
+              "value": "={{ $json.output.reason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        14016,
+        17984
+      ],
+      "id": "368c30c3-d9e0-4bbc-80eb-a4ae383458b5",
+      "name": "reduced"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "12184544-0c43-4414-9d5f-595e669aba77",
+              "name": "content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "a0d8f2ed-e8c0-411b-a105-18e394d3e4bf",
+              "name": "created_at",
+              "value": "={{ $json.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "4133d781-7ce8-4322-ba1b-a22a2965d2f7",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        13168,
+        18160
+      ],
+      "id": "655e9c9c-e792-4908-a1fe-3b972065b13c",
+      "name": "filter relevant fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.relevant }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "2e25416f-a58b-4ee5-9270-1fefe2dde1bb",
+      "name": "Is relevant?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        14240,
+        17984
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🚨 **Geopolitical Alert** ({{$json.severity?.toUpperCase() || 'UNKNOWN'}})\n\n> {{ $('filter relevant fields').item.json.content?.replace(/<[^>]*>?/gm, '').trim() || 'No text content.'}}\n\n**Why flagged:** {{$json.reason || 'N/A'}}\n**Posted:** {{ $('filter relevant fields').item.json.created_at || 'Unknown'}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        14464,
+        17984
+      ],
+      "id": "57fb9db4-0ad3-41e3-bc32-cc005b03963a",
+      "name": "Send discord",
+      "webhookId": "acf1be97-2446-4414-88e2-5fb512fc1714",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "SNMMWJWf8c8g7ktb",
+          "name": "Discord Webhook Feed debug"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "cfe8d9b0-2fbc-4e5f-93d2-f82ff14754a8",
+      "name": "Has new posts?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        12272,
+        18080
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c800ae2-a5de-4bd3-8c63-31e08237e2fc",
+              "name": "last_id",
+              "value": "={{ $json.value || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bdd5ff72-7c12-4887-ac69-8d4e79b3fb94",
+      "name": "Normalize last_id",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        11936,
+        18080
+      ],
+      "notes": "Normalizes the Data Table value before sending it to Bright Data."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Run Setup": {
+      "main": [
+        [
+          {
+            "node": "Create State Table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Test Bright Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Test ChatGPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create State Table": {
+      "main": [
+        [
+          {
+            "node": "Initialize last_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize last_id": {
+      "main": [
+        [
+          {
+            "node": "Setup Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Complete": {
+      "main": [
+        [
+          {
+            "node": "Wait For All Tests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Bright Data": {
+      "main": [
+        [
+          {
+            "node": "Wait For All Tests",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait For All Tests": {
+      "main": [
+        [
+          {
+            "node": "Setup Test Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test ChatGPT": {
+      "main": [
+        [
+          {
+            "node": "Wait For All Tests",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Classification (GPT)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Classification (GPT)": {
+      "main": [
+        [
+          {
+            "node": "reduced",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every minute": {
+      "main": [
+        [
+          {
+            "node": "Get last_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get last_id": {
+      "main": [
+        [
+          {
+            "node": "Normalize last_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch new statuses - BrightData": {
+      "main": [
+        [
+          {
+            "node": "Has new posts?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Max ID": {
+      "main": [
+        [
+          {
+            "node": "Update last_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract created_at": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "filter relevant fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keyword Prefilter": {
+      "main": [
+        [
+          {
+            "node": "Extract Classification (GPT)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing, irrelevant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reduced": {
+      "main": [
+        [
+          {
+            "node": "Is relevant?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter relevant fields": {
+      "main": [
+        [
+          {
+            "node": "Keyword Prefilter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is relevant?": {
+      "main": [
+        [
+          {
+            "node": "Send discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has new posts?": {
+      "main": [
+        [
+          {
+            "node": "extract created_at",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calculate Max ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize last_id": {
+      "main": [
+        [
+          {
+            "node": "Fetch new statuses - BrightData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b22994df-dab4-449b-9f69-ba23463eae2a",
+  "meta": {
+    "instanceId": "b0b65122c04ef542be6b2ef6b2c2f9005a5c29e631b88e422bb24c2768d7b592"
+  },
+  "id": "N2hnsB8wKaKSkPXL",
+  "tags": []
+}
