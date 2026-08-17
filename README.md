@@ -5,6 +5,9 @@
 ![Cost](https://img.shields.io/badge/Cost-<$1/mo-success?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
+<img width="1260" height="473" alt="Screenshot 2026-08-13 at 12 44 43 PM" src="https://github.com/user-attachments/assets/fd3fcc17-2b7a-44d7-a2f3-48e48458d6e5" />
+
+
 Wall Street hedge funds are reportedly paying up to **$100,000 a month** for Truth Social's new "Truth API" to get millisecond-level access to market-moving presidential posts. 
 
 This repository contains a complete, automated Open-Source Intelligence (OSINT) pipeline that bypasses the institutional paywall and delivers structured, AI-filtered geopolitical alerts directly to your Discord server for **under $1 a month**.
